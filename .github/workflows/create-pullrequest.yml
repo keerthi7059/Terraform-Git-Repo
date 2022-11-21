@@ -1,0 +1,56 @@
+# this job will create the pull request for feature branch from main branch and once push to main, build or change infrastructure
+name: create PR for each commit
+on:
+  push:
+    branches-ignore: main
+jobs:
+  action-pull-request:
+    name: "terraform-create-PR"
+    runs-on: ubuntu-latest
+    # Checkout the repository to the GitHub Actions runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Install the preferred version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.10
+
+      - name: Run the Action
+        if: startsWith(github.ref, 'refs/heads/feature')
+        uses: devops-infra/action-pull-request@v0.5.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: ${{ github.event.commits[0].message }}
+          assignee: ${{ github.actor }}
+          label: automatic,feature
+          old_string: "**Write you description here**"
+          new_string: ${{ github.event.commits[0].message }}
+          get_diff: true
+
+      # Run a terraform inti
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      # Run a terraform validate
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      # Run a terraform plan for pull requests only
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name=='pull_request'
+        run: terraform plan -no-color
+
+      # On push to main, build or change infrastructure according to Terraform configuration files
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
+        title: ${{ github.event.commits[0].message }}
+        assignee: ${{ github.actor }}
