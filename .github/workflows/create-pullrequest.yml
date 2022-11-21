@@ -22,7 +22,7 @@ jobs:
 
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: keerthi7059/Terraform-Git-Repo/create-pull-request@v2
+        uses: keerthi7059/Terraform-Git-Repo/create-pull-request@feature
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}
