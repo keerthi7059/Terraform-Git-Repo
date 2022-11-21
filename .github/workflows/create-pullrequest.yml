@@ -52,5 +52,3 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
-        title: ${{ github.event.commits[0].message }}
-        assignee: ${{ github.actor }}
