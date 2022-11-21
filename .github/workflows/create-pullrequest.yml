@@ -10,19 +10,19 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.0.10
 
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@v0.5.3
+        uses: keerthi7059/Terraform-Git-Repo/create-pull-request@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}
@@ -52,5 +52,3 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
-        title: ${{ github.event.commits[0].message }}
-        assignee: ${{ github.actor }}
